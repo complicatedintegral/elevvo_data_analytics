@@ -2,7 +2,7 @@
 
 Welcome to my **Elevvo Data Analytics** internship repository! This collection showcases hands‑on projects from the Elevvo Two Week Data Analytics Internship track, highlighting real‑world business use cases and data storytelling.
 
-## 🧪 Project Overview
+## Project Overview
 
 ### Sales Performance Dashboard using Excel
 
