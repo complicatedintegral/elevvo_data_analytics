@@ -1,0 +1,325 @@
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 13
+Server version: 8.0.41 MySQL Community Server - GPL
+
+Copyright (c) 2000, 2025, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql> use chinook;
+Database changed
+mysql> -- Exploring the database
+mysql> show tables;
++-------------------+
+| Tables_in_chinook |
++-------------------+
+| album             |
+| artist            |
+| customer          |
+| employee          |
+| genre             |
+| invoice           |
+| invoiceline       |
+| mediatype         |
+| playlist          |
+| playlisttrack     |
+| track             |
++-------------------+
+11 rows in set (0.00 sec)
+
+mysql> desc track;
++--------------+---------------+------+-----+---------+-------+
+| Field        | Type          | Null | Key | Default | Extra |
++--------------+---------------+------+-----+---------+-------+
+| TrackId      | int           | NO   | PRI | NULL    |       |
+| Name         | varchar(200)  | NO   |     | NULL    |       |
+| AlbumId      | int           | YES  | MUL | NULL    |       |
+| MediaTypeId  | int           | NO   | MUL | NULL    |       |
+| GenreId      | int           | YES  | MUL | NULL    |       |
+| Composer     | varchar(220)  | YES  |     | NULL    |       |
+| Milliseconds | int           | NO   |     | NULL    |       |
+| Bytes        | int           | YES  |     | NULL    |       |
+| UnitPrice    | decimal(10,2) | NO   |     | NULL    |       |
++--------------+---------------+------+-----+---------+-------+
+9 rows in set (0.00 sec)
+
+mysql> desc invoiceline;
++---------------+---------------+------+-----+---------+-------+
+| Field         | Type          | Null | Key | Default | Extra |
++---------------+---------------+------+-----+---------+-------+
+| InvoiceLineId | int           | NO   | PRI | NULL    |       |
+| InvoiceId     | int           | NO   | MUL | NULL    |       |
+| TrackId       | int           | NO   | MUL | NULL    |       |
+| UnitPrice     | decimal(10,2) | NO   |     | NULL    |       |
+| Quantity      | int           | NO   |     | NULL    |       |
++---------------+---------------+------+-----+---------+-------+
+5 rows in set (0.00 sec)
+
+mysql> SELECT
+    ->     t.Name AS TrackName,
+    ->     SUM(il.Quantity) AS TotalSold
+    -> FROM track t
+    -> JOIN invoiceline il ON t.TrackId = il.TrackId
+    -> GROUP BY t.Name
+    -> ORDER BY TotalSold DESC
+    -> LIMIT 10;
++---------------------------+-----------+
+| TrackName                 | TotalSold |
++---------------------------+-----------+
+| Dazed and Confused        |         5 |
+| The Trooper               |         5 |
+| The Number Of The Beast   |         4 |
+| Hallowed Be Thy Name      |         4 |
+| Untitled                  |         4 |
+| Eruption                  |         4 |
+| Sure Know Something       |         4 |
+| Welcome Home (Sanitarium) |         3 |
+| Brasil                    |         3 |
+| Blood Brothers            |         3 |
++---------------------------+-----------+
+10 rows in set (0.01 sec)
+
+mysql> -- Top selling tracks
+mysql> SELECT
+    ->     t.Name AS TrackName,
+    ->     SUM(il.Quantity) AS TotalSold
+    -> FROM track t
+    -> JOIN invoiceline il ON t.TrackId = il.TrackId
+    -> GROUP BY t.Name
+    -> ORDER BY TotalSold DESC
+    -> LIMIT 10;
++---------------------------+-----------+
+| TrackName                 | TotalSold |
++---------------------------+-----------+
+| Dazed and Confused        |         5 |
+| The Trooper               |         5 |
+| The Number Of The Beast   |         4 |
+| Hallowed Be Thy Name      |         4 |
+| Untitled                  |         4 |
+| Eruption                  |         4 |
+| Sure Know Something       |         4 |
+| Welcome Home (Sanitarium) |         3 |
+| Brasil                    |         3 |
+| Blood Brothers            |         3 |
++---------------------------+-----------+
+10 rows in set (0.01 sec)
+
+mysql> -- Total Revenue by country
+mysql> SELECT
+    ->     c.Country,
+    ->     ROUND(SUM(i.Total), 2) AS Revenue
+    -> FROM invoice i
+    -> JOIN customer c ON i.CustomerId = c.CustomerId
+    -> GROUP BY c.Country
+    -> ORDER BY Revenue DESC;
++----------------+---------+
+| Country        | Revenue |
++----------------+---------+
+| USA            |  523.06 |
+| Canada         |  303.96 |
+| France         |  195.10 |
+| Brazil         |  190.10 |
+| Germany        |  156.48 |
+| United Kingdom |  112.86 |
+| Czech Republic |   90.24 |
+| Portugal       |   77.24 |
+| India          |   75.26 |
+| Chile          |   46.62 |
+| Hungary        |   45.62 |
+| Ireland        |   45.62 |
+| Austria        |   42.62 |
+| Finland        |   41.62 |
+| Netherlands    |   40.62 |
+| Norway         |   39.62 |
+| Sweden         |   38.62 |
+| Belgium        |   37.62 |
+| Denmark        |   37.62 |
+| Italy          |   37.62 |
+| Poland         |   37.62 |
+| Spain          |   37.62 |
+| Australia      |   37.62 |
+| Argentina      |   37.62 |
++----------------+---------+
+24 rows in set (0.01 sec)
+
+mysql> -- Monthly Revenue trend
+mysql> SELECT
+    ->     DATE_FORMAT(i.InvoiceDate, '%Y-%m') AS Month,
+    ->     ROUND(SUM(i.Total), 2) AS MonthlyRevenue
+    -> FROM invoice i
+    -> GROUP BY Month
+    -> ORDER BY Month;
++---------+----------------+
+| Month   | MonthlyRevenue |
++---------+----------------+
+| 2021-01 |          35.64 |
+| 2021-02 |          37.62 |
+| 2021-03 |          37.62 |
+| 2021-04 |          37.62 |
+| 2021-05 |          37.62 |
+| 2021-06 |          37.62 |
+| 2021-07 |          37.62 |
+| 2021-08 |          37.62 |
+| 2021-09 |          37.62 |
+| 2021-10 |          37.62 |
+| 2021-11 |          37.62 |
+| 2021-12 |          37.62 |
+| 2022-01 |          52.62 |
+| 2022-02 |          46.62 |
+| 2022-03 |          44.62 |
+| 2022-04 |          37.62 |
+| 2022-05 |          37.62 |
+| 2022-06 |          37.62 |
+| 2022-07 |          37.62 |
+| 2022-08 |          37.62 |
+| 2022-09 |          36.63 |
+| 2022-10 |          37.62 |
+| 2022-11 |          37.62 |
+| 2022-12 |          37.62 |
+| 2023-01 |          37.62 |
+| 2023-02 |          37.62 |
+| 2023-03 |          37.62 |
+| 2023-04 |          51.62 |
+| 2023-05 |          42.62 |
+| 2023-06 |          50.62 |
+| 2023-07 |          37.62 |
+| 2023-08 |          37.62 |
+| 2023-09 |          37.62 |
+| 2023-10 |          37.62 |
+| 2023-11 |          23.76 |
+| 2023-12 |          37.62 |
+| 2024-01 |          37.62 |
+| 2024-02 |          37.62 |
+| 2024-03 |          37.62 |
+| 2024-04 |          37.62 |
+| 2024-05 |          37.62 |
+| 2024-06 |          37.62 |
+| 2024-07 |          39.62 |
+| 2024-08 |          47.62 |
+| 2024-09 |          46.71 |
+| 2024-10 |          42.62 |
+| 2024-11 |          37.62 |
+| 2024-12 |          37.62 |
+| 2025-01 |          37.62 |
+| 2025-02 |          27.72 |
+| 2025-03 |          37.62 |
+| 2025-04 |          33.66 |
+| 2025-05 |          37.62 |
+| 2025-06 |          37.62 |
+| 2025-07 |          37.62 |
+| 2025-08 |          37.62 |
+| 2025-09 |          37.62 |
+| 2025-10 |          37.62 |
+| 2025-11 |          49.62 |
+| 2025-12 |          38.62 |
++---------+----------------+
+60 rows in set (0.01 sec)
+
+mysql> select count(*) from invoiceline;
++----------+
+| count(*) |
++----------+
+|     2240 |
++----------+
+1 row in set (0.00 sec)
+
+mysql> -- Top three tracks from every country using Row_number
+mysql> SELECT *
+    -> FROM (
+    ->     SELECT
+    ->         c.Country,
+    ->         t.Name AS Track,
+    ->         SUM(il.Quantity) AS TotalSold,
+    ->         ROW_NUMBER() OVER (
+    ->             PARTITION BY c.Country
+    ->             ORDER BY SUM(il.Quantity) DESC
+    ->         ) AS rnk
+    ->     FROM invoice i
+    ->     JOIN customer c ON i.CustomerId = c.CustomerId
+    ->     JOIN invoiceline il ON i.InvoiceId = il.InvoiceId
+    ->     JOIN track t ON il.TrackId = t.TrackId
+    ->     GROUP BY c.Country, t.Name
+    -> ) ranked
+    -> WHERE rnk <= 3
+    -> ORDER BY Country, rnk;
++----------------+----------------------------------------------+-----------+-----+
+| Country        | Track                                        | TotalSold | rnk |
++----------------+----------------------------------------------+-----------+-----+
+| Argentina      | New Love                                     |         1 |   1 |
+| Argentina      | Compadre                                     |         1 |   2 |
+| Argentina      | Não Quero Dinheiro                           |         1 |   3 |
+| Australia      | Sure Know Something                          |         1 |   1 |
+| Australia      | Walking On The Water                         |         1 |   2 |
+| Australia      | Suzie-Q, Pt. 2                               |         1 |   3 |
+| Austria        | Won't Get Fooled Again (Full Length Version) |         1 |   1 |
+| Austria        | 5.15                                         |         1 |   2 |
+| Austria        | Squeeze Box                                  |         1 |   3 |
+| Belgium        | Dog Eat Dog                                  |         1 |   1 |
+| Belgium        | Overdose                                     |         1 |   2 |
+| Belgium        | Love In An Elevator                          |         1 |   3 |
+| Brazil         | Untitled                                     |         2 |   1 |
+| Brazil         | Fast As a Shark                              |         1 |   2 |
+| Brazil         | Snowballed                                   |         1 |   3 |
+| Canada         | Good Golly Miss Molly                        |         2 |   1 |
+| Canada         | Onde Você Mora?                              |         2 |   2 |
+| Canada         | Brasil                                       |         2 |   3 |
+| Chile          | Hero                                         |         1 |   1 |
+| Chile          | The Woman King                               |         1 |   2 |
+| Chile          | Crossroads, Pt. 2                            |         1 |   3 |
+| Czech Republic | Stranger in a Strange Land                   |         2 |   1 |
+| Czech Republic | My Time After Awhile                         |         1 |   2 |
+| Czech Republic | Prenda Minha                                 |         1 |   3 |
+| Denmark        | Jealous Guy                                  |         1 |   1 |
+| Denmark        | Beautiful Boy                                |         1 |   2 |
+| Denmark        | Gimme Some Truth                             |         1 |   3 |
+| Finland        | Eruption                                     |         2 |   1 |
+| Finland        | Higher Ground                                |         1 |   2 |
+| Finland        | Secrets                                      |         1 |   3 |
+| France         | Sea Of Sorrow                                |         1 |   1 |
+| France         | Real Thing                                   |         1 |   2 |
+| France         | Falando De Amor                              |         1 |   3 |
+| Germany        | Eruption                                     |         2 |   1 |
+| Germany        | The Number Of The Beast                      |         2 |   2 |
+| Germany        | Balls to the Wall                            |         1 |   3 |
+| Hungary        | O Pulso                                      |         1 |   1 |
+| Hungary        | Nem 5 Minutos Guardados                      |         1 |   2 |
+| Hungary        | Do You Feel Loved                            |         1 |   3 |
+| India          | Gates Of Urizen                              |         1 |   1 |
+| India          | Trupets Of Jericho                           |         1 |   2 |
+| India          | Shock Me                                     |         1 |   3 |
+| Ireland        | Adrift                                       |         1 |   1 |
+| Ireland        | ...And Found                                 |         1 |   2 |
+| Ireland        | The Other 48 Days                            |         1 |   3 |
+| Italy          | For Those About To Rock (We Salute You)      |         1 |   1 |
+| Italy          | Princess of the Dawn                         |         1 |   2 |
+| Italy          | Snowballed                                   |         1 |   3 |
+| Netherlands    | War of the Gods, Pt. 2                       |         1 |   1 |
+| Netherlands    | Greetings from Earth, Pt. 2                  |         1 |   2 |
+| Netherlands    | The Hand of God                              |         1 |   3 |
+| Norway         | Put The Finger On You                        |         1 |   1 |
+| Norway         | Inject The Venom                             |         1 |   2 |
+| Norway         | Evil Walks                                   |         1 |   3 |
+| Poland         | Wake Up Dead Man                             |         1 |   1 |
+| Poland         | Hawkmoon 269                                 |         1 |   2 |
+| Poland         | Silver And Gold                              |         1 |   3 |
+| Portugal       | Whiskey In The Jar                           |         1 |   1 |
+| Portugal       | As Rosas Não Falam (Beth Carvalho)           |         1 |   2 |
+| Portugal       | Wave (Os Cariocas)                           |         1 |   3 |
+| Spain          | I Can't Explain                              |         1 |   1 |
+| Spain          | I'm A Boy                                    |         1 |   2 |
+| Spain          | I Can See For Miles                          |         1 |   3 |
+| Sweden         | Polly                                        |         2 |   1 |
+| Sweden         | Jorge Da Capadócia                           |         1 |   2 |
+| Sweden         | Bem Devagar                                  |         1 |   3 |
+| United Kingdom | Firmamento                                   |         2 |   1 |
+| United Kingdom | Problem Child                                |         1 |   2 |
+| United Kingdom | Rag Doll                                     |         1 |   3 |
+| USA            | Heaven Can Wait                              |         3 |   1 |
+| USA            | Meditação                                    |         2 |   2 |
+| USA            | Train In Vain                                |         2 |   3 |
++----------------+----------------------------------------------+-----------+-----+
+72 rows in set (0.04 sec)
