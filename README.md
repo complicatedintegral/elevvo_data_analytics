@@ -19,8 +19,8 @@ Welcome to my **Elevvo Data Analytics** internship repository! This collection s
 - Age column filled with median age.
 - Cabin column dropped because too many values are missing
 - Embarked column filled with the most common port value
-1. Converted columns to categories wherever appropriate
-2. Visualized group based insights using bar plots and heat maps
+3. Converted columns to categories wherever appropriate
+4. Visualized group based insights using bar plots and heat maps
 
 ### SQL Sales Analysis - Chinook Database
 
